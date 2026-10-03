@@ -20,8 +20,8 @@ internal static class Program
         var authKey = Environment.GetEnvironmentVariable("GIGACHAT_AUTH_KEY");
         if (string.IsNullOrWhiteSpace(authKey))
         {
-            var keyFile = Path.Combine(Directory.GetCurrentDirectory(), ".gigachat-auth-key");
-            if (File.Exists(keyFile))
+            var keyFile = FindProjectKeyFile();
+            if (keyFile is not null)
                 authKey = await File.ReadAllTextAsync(keyFile);
         }
 
@@ -136,6 +136,22 @@ internal static class Program
 
         var details = body.Length > 1000 ? body[..1000] : body;
         throw new HttpRequestException($"{operation}: HTTP {(int)status}. {details}");
+    }
+
+    private static string? FindProjectKeyFile()
+    {
+        for (var directory = new DirectoryInfo(AppContext.BaseDirectory);
+             directory is not null;
+             directory = directory.Parent)
+        {
+            if (!File.Exists(Path.Combine(directory.FullName, "AIAssistant.csproj")))
+                continue;
+
+            var keyFile = Path.Combine(directory.FullName, ".gigachat-auth-key");
+            return File.Exists(keyFile) ? keyFile : null;
+        }
+
+        return null;
     }
 
     private static bool ValidateServerCertificate(
