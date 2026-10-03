@@ -43,7 +43,10 @@ internal static class Program
         try
         {
             var token = await GetAccessTokenAsync(httpClient, authKey.Trim(), scope);
-            var history = new List<ChatMessage>();
+            var history = new List<ChatMessage>
+            {
+                new("system", "Ты ассистент по C# для начинающего разработчика. Отвечай кратко. Всегда отвечай на русском языке, даже если вопрос задан на другом языке.")
+            };
 
             Console.WriteLine("Подключено. Введите сообщение или 'выход' для завершения.");
             while (true)
